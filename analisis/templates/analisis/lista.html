@@ -1,0 +1,26 @@
+<!-- Versión minimalista -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista de textos</title>
+</head>
+<body>
+    <h1>Textos subidos</h1>
+
+    {% if textos %}
+        <ul>
+            {% for texto in textos %}
+                <li>
+                    <strong>{{ texto.titulo }}</strong>
+                    - <a href="{% url 'ver_histograma' texto.id %}">Ver histograma</a>
+                    ({{ texto.palabras.count }} palabras)
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay textos todavía.</p>
+    {% endif %}
+
+    <a href="{% url 'subir_texto' %}">Subir nuevo texto</a>
+</body>
+</html>

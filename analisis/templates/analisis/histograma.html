@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Histograma de palabras</title>
+</head>
+<body>
+    <h1>Histograma de "{{ texto.titulo }}"</h1>
+
+    {% if palabras %}
+        <table border="1">
+            <tr>
+                <th>Palabra</th>
+                <th>Frecuencia</th>
+            </tr>
+            {% for palabra in palabras %}
+            <tr>
+                <td>{{ palabra.contenido }}</td>
+                <td>{{ palabra.frecuencia }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No se encontraron palabras.</p>
+    {% endif %}
+
+    <a href="{% url 'lista_textos' %}">Volver</a>
+</body>
+</html>
