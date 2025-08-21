@@ -19,7 +19,7 @@ Sistema Django para análisis de textos y generación de histogramas de frecuenc
 
 1. Clonar el repositorio:
 ```bash
-git clone [URL_DEL_REPOSITORIO]
+git clone [https://github.com/Uziel-Bautista/Proyecto_PLN.git]
 cd Procesamiento_de_lenguaje_natural
 
 2. Crear Entorno Virtual (Recomendado)
