@@ -1,26 +1,94 @@
-<!-- Versión minimalista -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Lista de textos</title>
+    <title>Lista de textos analizados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: white;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .texto-info {
+            flex-grow: 1;
+        }
+        .acciones a {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+        .acciones a:hover {
+            background-color: #45a049;
+        }
+        .subir-btn {
+            display: inline-block;
+            background-color: #2196F3;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .subir-btn:hover {
+            background-color: #0b7dda;
+        }
+        .sin-textos {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 <body>
-    <h1>Textos subidos</h1>
+    <h1>Textos analizados</h1>
 
     {% if textos %}
         <ul>
             {% for texto in textos %}
                 <li>
-                    <strong>{{ texto.titulo }}</strong>
-                    - <a href="{% url 'ver_histograma' texto.id %}">Ver histograma</a>
-                    ({{ texto.palabras.count }} palabras)
+                    <div class="texto-info">
+                        <strong>{{ texto.titulo }}</strong>
+                        <div>Subido el: {{ texto.fecha_subida|date:"d/m/Y H:i" }}</div>
+                        <div>{{ texto.palabras.count }} palabras únicas identificadas</div>
+                    </div>
+                    <div class="acciones">
+                        <a href="{% url 'ver_histograma' texto.id %}">Ver histograma</a>
+                    </div>
                 </li>
             {% endfor %}
         </ul>
     {% else %}
-        <p>No hay textos todavía.</p>
+        <div class="sin-textos">
+            <p>No hay textos analizados todavía.</p>
+            <p>Sube tu primer texto para analizar sus palabras más frecuentes.</p>
+        </div>
     {% endif %}
 
-    <a href="{% url 'subir_texto' %}">Subir nuevo texto</a>
+    <a class="subir-btn" href="{% url 'subir_texto' %}">Subir nuevo texto</a>
 </body>
 </html>

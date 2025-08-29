@@ -7,7 +7,7 @@ def subir_texto(request):
         form = TextoAnalizadoForm(request.POST, request.FILES)
         if form.is_valid():
             texto = form.save()
-            texto.procesar_texto()
+            # El procesamiento se hace automáticamente en el método save() del modelo
             return redirect('lista_textos')
     else:
         form = TextoAnalizadoForm()
@@ -19,5 +19,5 @@ def lista_textos(request):
 
 def ver_histograma(request, texto_id):
     texto = get_object_or_404(TextoAnalizado, id=texto_id)
-    palabras = texto.palabras.order_by('-frecuencia')
+    palabras = texto.palabras.all()  # Ya están ordenadas por el Meta ordering del modelo
     return render(request, 'analisis/histograma.html', {'texto': texto, 'palabras': palabras})
