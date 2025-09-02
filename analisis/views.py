@@ -1,23 +1,89 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import TextoAnalizadoForm
-from .models import TextoAnalizado
+from .models import TextoAnalizado, Palabra
+import nltk
+import ssl
+import os
+from django.conf import settings
 
+# Inicialización de NLTK
+def initialize_nltk():
+    """Inicializa y descarga los recursos necesarios de NLTK"""
+    try:
+        # Configurar SSL para evitar problemas de certificado
+        try:
+            _create_unverified_https_context = ssl._create_unverified_context
+        except AttributeError:
+            pass
+        else:
+            ssl._create_default_https_context = _create_unverified_https_context
+        
+        # Establecer la ruta para datos de NLTK
+        nltk_data_dir = os.path.join(settings.BASE_DIR, 'nltk_data')
+        if not os.path.exists(nltk_data_dir):
+            os.makedirs(nltk_data_dir)
+        
+        nltk.data.path.append(nltk_data_dir)
+        
+        # Descargar recursos necesarios
+        resources = ['punkt', 'punkt_tab', 'stopwords']
+        for resource in resources:
+            try:
+                if resource == 'stopwords':
+                    nltk.data.find(f'corpora/{resource}')
+                else:
+                    nltk.data.find(f'tokenizers/{resource}')
+            except LookupError:
+                print(f"Descargando recurso NLTK: {resource}")
+                nltk.download(resource, download_dir=nltk_data_dir)
+                
+    except Exception as e:
+        print(f"Error inicializando NLTK: {e}")
+
+# Inicializar NLTK al importar el módulo
+initialize_nltk()
+
+# Vista para listar los textos subidos
+def lista_textos(request):
+    textos = TextoAnalizado.objects.all().order_by('-fecha_subida')
+    return render(request, 'analisis/lista.html', {'textos': textos})
+
+# Vista para subir un texto y procesarlo
 def subir_texto(request):
     if request.method == 'POST':
         form = TextoAnalizadoForm(request.POST, request.FILES)
         if form.is_valid():
-            texto = form.save()
-            # El procesamiento se hace automáticamente en el método save() del modelo
+            texto = form.save(commit=False)
+            texto.titulo = texto.archivo.name  # Asignar nombre del archivo como título
+            texto.save()
+
+            # El procesamiento se hace automáticamente en el modelo con save()
+            print(f"Texto guardado: {texto.titulo}")
+            print(f"Palabras procesadas: {texto.palabras.count()}")
+            
             return redirect('lista_textos')
     else:
         form = TextoAnalizadoForm()
     return render(request, 'analisis/subir.html', {'form': form})
 
-def lista_textos(request):
-    textos = TextoAnalizado.objects.all().order_by('-fecha_subida')
-    return render(request, 'analisis/lista.html', {'textos': textos})
-
+# Vista para ver histograma
 def ver_histograma(request, texto_id):
-    texto = get_object_or_404(TextoAnalizado, id=texto_id)
-    palabras = texto.palabras.all()  # Ya están ordenadas por el Meta ordering del modelo
-    return render(request, 'analisis/histograma.html', {'texto': texto, 'palabras': palabras})
+    texto = get_object_or_404(TextoAnalizado, pk=texto_id)
+    
+    # Obtener las palabras ya procesadas desde la base de datos
+    palabras = texto.palabras.all()[:10]  # Top 10
+    
+    print(f"Texto: {texto.titulo}")
+    print(f"Total de palabras en BD: {texto.palabras.count()}")
+    print(f"Mostrando: {palabras.count()} palabras")
+    
+    # Preparar datos para el template
+    labels = [palabra.contenido for palabra in palabras]
+    values = [palabra.frecuencia for palabra in palabras]
+    
+    return render(request, 'analisis/histograma.html', {
+        'texto': texto,
+        'palabras': palabras,
+        'labels': labels,
+        'values': values
+    })

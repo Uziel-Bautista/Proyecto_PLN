@@ -12,6 +12,12 @@ Sistema Django para análisis de textos y generación de histogramas de frecuenc
 - Eliminación de puntuación y caracteres especiales
 - Filtrado de stopwords en español
 - Interfaz web responsive
+- Selección de tamaño de n-grama (1-20)
+- Procesamiento automático con NLTK
+- Histogramas interactivos con Chart.js
+- Interfaz responsive con Bootstrap
+- Detección automática de stopwords en español
+- Visualización de top 10 n-gramas
 
 ## Requisitos
 
@@ -38,27 +44,54 @@ sudo apt-get install python3-dev
 brew install python
 
 
-## Configuración
-
-1. Configurar base de datos
-# Aplicar migraciones
-pipenv run python manage.py migrate
-
-2. Descargar recursos de NLTK
-# Ejecutar shell de Django
-pipenv run python manage.py shell
-# En el shell, ejecutar:
-import nltk
-nltk.download('stopwords')
-exit()
-
-3. Crear superusuario (opcional)
-pipenv run python manage.py createsuperuser
 
 ## Ejecución
 
-1. Iniciar servidor de desarrollo
-pipenv run python manage.py runserver
+1. Activar entorno virtual
+pipenv shell
 
-2. Acceder a la aplicación
+2. Configurar base de datos
+python manage.py migrate
+
+3. Crear superusuario (opcional)
+python manage.py createsuperuser
+
+4. Ejecutar servidor
+python manage.py runserver
+
+5. Abrir en el navegador
 Abrir en el navegador: http://127.0.0.1:8000/
+
+Uso del Sistema
+Subir texto: Click en "Subir nuevo texto"
+
+Seleccionar archivo: Elegir archivo .txt desde tu computadora
+
+Elegir n-grama: Ingresar un número entre 1 y 20 (ej: 2 para bigramas, 3 para trigramas)
+
+Procesar: El sistema analizará automáticamente el texto
+
+Ver resultados: Click en "Ver histograma" para ver la visualización
+
+
+Notas Importantes
+Primera Ejecución
+La primera vez que se ejecute, el sistema descargará automáticamente los recursos de NLTK
+
+Esto puede tomar 1-2 minutos
+
+Se creará la carpeta nltk_data/ automáticamente
+
+Formatos de Archivo
+Solo se aceptan archivos de texto (.txt)
+
+El sistema soporta codificación UTF-8 y Latin-1
+
+Recursos NLTK
+El sistema requiere estos recursos de NLTK:
+
+punkt - Tokenizador
+
+punkt_tab - Tokenizador con tabulaciones
+
+stopwords - Palabras vacías en español
