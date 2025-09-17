@@ -43,6 +43,7 @@
         .acciones a:hover {
             background-color: #45a049;
         }
+        /* Botón azul “Subir nuevo texto” */
         .subir-btn {
             display: inline-block;
             background-color: #2196F3;
@@ -77,7 +78,12 @@
                         <div>{{ texto.palabras.count }} palabras únicas identificadas</div>
                     </div>
                     <div class="acciones">
-                        <a href="{% url 'ver_histograma' texto.id %}">Ver histograma</a>
+                        <!-- Botón existente -->
+                    <a href="{% url 'ver_histograma' texto.id %}" class="btn btn-success me-2">Ver histograma</a>
+                    <a href="{% url 'ver_probabilidades' texto.id %}" class="btn btn-success me-2">Ver probabilidades</a>
+                    <a href="{% url 'ver_probabilidades_fronteras' texto.id %}" class="btn btn-success">Ver con fronteras</a>
+
+
                     </div>
                 </li>
             {% endfor %}

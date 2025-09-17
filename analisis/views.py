@@ -5,6 +5,10 @@ import nltk
 import ssl
 import os
 from django.conf import settings
+from django.shortcuts import render, get_object_or_404
+from .utils_ngram_mle import calcular_probabilidades
+
+
 
 # Inicialización de NLTK
 def initialize_nltk():
@@ -87,3 +91,123 @@ def ver_histograma(request, texto_id):
         'labels': labels,
         'values': values
     })
+
+from collections import Counter
+from nltk.util import ngrams
+import nltk
+import string
+
+def ver_probabilidades(request, texto_id):
+    """
+    Muestra las tablas de frecuencias y probabilidades condicionales
+    usando los n-gramas ya procesados y guardados en el modelo Palabra.
+    """
+    texto = get_object_or_404(TextoAnalizado, pk=texto_id)
+
+    # Obtener los n-gramas guardados en la base de datos
+    palabras = texto.palabras.all()  # Ya están ordenadas por frecuencia (-frecuencia)
+    
+    # Calcular la probabilidad MLE de cada n-grama
+    if texto.n_grama > 1:
+        # Para n-gramas mayores a 1, calcular probabilidad condicional
+        # Agrupar por prefijo (todos excepto la última palabra)
+        from collections import defaultdict
+
+        prefix_counts = defaultdict(int)
+        for p in palabras:
+            tokens = p.contenido.split()
+            prefix = ' '.join(tokens[:-1])
+            prefix_counts[prefix] += p.frecuencia
+
+        tabla = []
+        for p in palabras:
+            tokens = p.contenido.split()
+            prefix = ' '.join(tokens[:-1])
+            prob = p.frecuencia / prefix_counts[prefix] if prefix_counts[prefix] > 0 else 0
+            tabla.append({
+                'ngram': p.contenido,
+                'frecuencia': p.frecuencia,
+                'probabilidad': round(prob, 4)
+            })
+    else:
+        # Para unigramas, probabilidad = frecuencia / total
+        total = sum(p.frecuencia for p in palabras)
+        tabla = [{
+            'ngram': p.contenido,
+            'frecuencia': p.frecuencia,
+            'probabilidad': round(p.frecuencia / total, 4)
+        } for p in palabras]
+
+    contexto = {
+        'texto': texto,
+        'tabla': tabla,
+        'n': texto.n_grama,
+    }
+
+    return render(request, 'analisis/probabilidades.html', contexto)
+
+def calcular_probabilidades_con_fronteras(texto):
+    """
+    Recibe un objeto TextoAnalizado y devuelve una tabla de n-gramas con
+    probabilidades condicionales incluyendo <s> y </s>.
+    """
+    import nltk
+    from collections import Counter
+    from nltk.util import ngrams
+
+    # Tokenizar por oraciones
+    contenido = ''
+    with texto.archivo.open('rb') as f:
+        try:
+            contenido = f.read().decode('utf-8').lower()
+        except UnicodeDecodeError:
+            f.seek(0)
+            contenido = f.read().decode('latin-1').lower()
+
+    import string
+    contenido = contenido.translate(str.maketrans('', '', string.punctuation + '¿¡'))
+
+    sentences = nltk.sent_tokenize(contenido)
+    tokens_fb = []
+    for sent in sentences:
+        words = nltk.word_tokenize(sent)
+        tokens_fb.extend(['<s>'] + words + ['</s>'])
+
+    n = texto.n_grama
+    n_grams = list(ngrams(tokens_fb, n))
+    ngram_freq = Counter(n_grams)
+    if n > 1:
+        prefix_freq = Counter([ngram[:-1] for ngram in n_grams])
+        tabla = []
+        for ngram, freq in ngram_freq.items():
+            prefix = ngram[:-1]
+            prob = freq / prefix_freq[prefix] if prefix_freq[prefix] > 0 else 0
+            tabla.append({
+                'ngram': ' '.join(ngram),
+                'frecuencia': freq,
+                'probabilidad': round(prob,4)
+            })
+    else:
+        total = sum(ngram_freq.values())
+        tabla = [{'ngram': ' '.join(ngram), 'frecuencia': freq, 'probabilidad': round(freq/total,4)} 
+                for ngram, freq in ngram_freq.items()]
+
+    return tabla
+
+def ver_probabilidades_fronteras(request, texto_id):
+    """
+    Vista que muestra probabilidades condicionales usando n-gramas
+    incluyendo las fronteras de oración <s> y </s>.
+    """
+    texto = get_object_or_404(TextoAnalizado, pk=texto_id)
+    tabla = calcular_probabilidades_con_fronteras(texto)
+
+    contexto = {
+        'texto': texto,
+        'tabla': tabla,
+        'n': texto.n_grama,
+    }
+
+    return render(request, 'analisis/probabilidades.html', contexto)
+
+
