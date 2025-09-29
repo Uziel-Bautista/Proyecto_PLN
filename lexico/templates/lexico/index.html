@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Analizador Léxico{% endblock %}
+
+{% block content %}
+<h2>Analizador Léxico</h2>
+<form method="post" enctype="multipart/form-data" class="mb-3" action="{% url 'lexico:procesar' %}">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn btn-primary" type="submit">Procesar</button>
+</form>
+{% endblock %}

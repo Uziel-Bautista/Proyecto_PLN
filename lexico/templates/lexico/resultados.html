@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Resultados{% endblock %}
+
+{% block content %}
+<h2>Resultados del análisis</h2>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Token Original</th>
+      <th>Token Reconocido</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for original, token in tokens %}
+    <tr>
+      <td>{{ original }}</td>
+      <td>{{ token }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if output_file %}
+<a href="/{{ output_file }}" class="btn btn-success" download>Descargar archivo</a>
+{% endif %}
+<a href="{% url 'lexico:index' %}" class="btn btn-secondary">Volver</a>
+{% endblock %}

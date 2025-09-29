@@ -65,7 +65,7 @@ def subir_texto(request):
             print(f"Texto guardado: {texto.titulo}")
             print(f"Palabras procesadas: {texto.palabras.count()}")
             
-            return redirect('lista_textos')
+            return redirect('analisis:lista_textos')
     else:
         form = TextoAnalizadoForm()
     return render(request, 'analisis/subir.html', {'form': form})

@@ -1,100 +1,33 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Lista de textos analizados</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        h1 {
-            color: #333;
-            border-bottom: 2px solid #ddd;
-            padding-bottom: 10px;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            background-color: white;
-            margin-bottom: 10px;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .texto-info {
-            flex-grow: 1;
-        }
-        .acciones a {
-            background-color: #4CAF50;
-            color: white;
-            padding: 8px 12px;
-            text-decoration: none;
-            border-radius: 4px;
-            margin-left: 10px;
-        }
-        .acciones a:hover {
-            background-color: #45a049;
-        }
-        /* Botón azul “Subir nuevo texto” */
-        .subir-btn {
-            display: inline-block;
-            background-color: #2196F3;
-            color: white;
-            padding: 10px 15px;
-            text-decoration: none;
-            border-radius: 4px;
-            margin-top: 20px;
-        }
-        .subir-btn:hover {
-            background-color: #0b7dda;
-        }
-        .sin-textos {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Lista de textos analizados{% endblock %}
+
+{% block content %}
     <h1>Textos analizados</h1>
 
     {% if textos %}
-        <ul>
+        <ul class="list-group">
             {% for texto in textos %}
-                <li>
-                    <div class="texto-info">
-                        <strong>{{ texto.titulo }}</strong>
-                        <div>Subido el: {{ texto.fecha_subida|date:"d/m/Y H:i" }}</div>
-                        <div>{{ texto.palabras.count }} palabras únicas identificadas</div>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ texto.titulo }}</strong><br>
+                        <small>Subido el: {{ texto.fecha_subida|date:"d/m/Y H:i" }}</small><br>
+                        <small>{{ texto.palabras.count }} palabras únicas identificadas</small>
                     </div>
-                    <div class="acciones">
-                        <!-- Botón existente -->
-                    <a href="{% url 'ver_histograma' texto.id %}" class="btn btn-success me-2">Ver histograma</a>
-                    <a href="{% url 'ver_probabilidades' texto.id %}" class="btn btn-success me-2">Ver probabilidades</a>
-                    <a href="{% url 'ver_probabilidades_fronteras' texto.id %}" class="btn btn-success">Ver con fronteras</a>
-
-
+                    <div class="btn-group">
+                        <a href="{% url 'analisis:ver_histograma' texto.id %}" class="btn btn-success btn-sm">Ver histograma</a>
+                        <a href="{% url 'analisis:ver_probabilidades' texto.id %}" class="btn btn-primary btn-sm">Ver probabilidades</a>
+                        <a href="{% url 'analisis:ver_probabilidades_fronteras' texto.id %}" class="btn btn-warning btn-sm">Ver con fronteras</a>
                     </div>
                 </li>
             {% endfor %}
         </ul>
     {% else %}
-        <div class="sin-textos">
-            <p>No hay textos analizados todavía.</p>
-            <p>Sube tu primer texto para analizar sus palabras más frecuentes.</p>
+        <div class="alert alert-info mt-3">
+            No hay textos analizados todavía.  
+            <br>Sube tu primer texto para analizar sus palabras más frecuentes.
         </div>
     {% endif %}
 
-    <a class="subir-btn" href="{% url 'subir_texto' %}">Subir nuevo texto</a>
-</body>
-</html>
+    <a class="btn btn-outline-primary mt-3" href="{% url 'analisis:subir_texto' %}">Subir nuevo texto</a>
+{% endblock %}
